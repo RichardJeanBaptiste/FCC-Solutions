@@ -1,12 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
 
   const [breakLength, SetBreakLength] = useState(5);
   const [sessionLength, SetSessionLength] = useState(25);
+  const [timeLeft, SetTimeLeft] = useState(null);
   const [start, SetStart] = useState("Start");
+  const [num, SetNum] = useState();
+  const [startTimer, SetStartTimer] = useState(false);
   
+  useEffect(() => {
+    let newDay = new Date();
+    newDay.setMinutes(25);
+    newDay.setSeconds(0);
+    SetTimeLeft(newDay);
+    SetNum(1000); 
+  },[]);
+
+
+  useEffect(() => {
+    let x;
+    if(startTimer) {
+      setTimeout(() => {
+        SetNum(() => num - 1);
+        x = new Date(timeLeft);
+        x.setSeconds(x.getSeconds() - 1);
+        SetTimeLeft(x);
+        //SetTimeLeft( timeLeft.setSeconds());
+      }, 1000);
+      //console.log(num);
+    }
+  },[startTimer, num, timeLeft]);
+
   const decrement_break = () => {
     if(breakLength - 1 == 0){
       return;
@@ -40,6 +66,11 @@ function App() {
   }
 
   const reset = () => {
+    let resetDay = new Date();
+    resetDay.setMinutes(25);
+    resetDay.setSeconds(0);
+    SetTimeLeft(resetDay);
+    SetStartTimer(false);
     SetBreakLength(() => 5);
     SetSessionLength(() => 25);
   }
@@ -47,8 +78,10 @@ function App() {
   const start_timer = () => {
     if(start == "Start"){
       SetStart("Stop");
+      SetStartTimer(true);
     } else{
       SetStart("Start");
+      SetStartTimer(false);
     }
   }
 
@@ -67,7 +100,7 @@ function App() {
       
       
       <p id="timer-label">Session</p>
-      <p id="time-left">time(mm:ss)</p>
+      <p id="time-left">{timeLeft == null ? "" : `${String(timeLeft.getMinutes()).padStart(2,'0')}:${String(timeLeft.getSeconds()).padStart(2,'0')}`}</p>
       <button id="start_stop" onClick={start_timer}>{start}</button>
       <button id="reset" onClick={reset}>Reset</button>
     </>
@@ -75,3 +108,5 @@ function App() {
 }
 
 export default App
+
+// {`${timeLeft.getMinutes()}:${timeLeft.getSeconds()}`}
