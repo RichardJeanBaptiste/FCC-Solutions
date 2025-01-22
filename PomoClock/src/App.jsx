@@ -1,84 +1,103 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import './App.css'
 import beep from './assets/beep2.mp3';
 
 function App() {
 
   const audioRef = useRef(null);
+  // eslint-disable-next-line no-unused-vars
   const [timerLabel, SetTimerLabel] = useState("Session");
+  const [sessionId, SetSessionId] = useState();
   const [breakLength, SetBreakLength] = useState(5);
   const [sessionLength, SetSessionLength] = useState(25);
-  const [timeLeft, SetTimeLeft] = useState(null);
+  const [timeLeft, SetTimeLeft] = useState(0);
+  const [min, SetMins] = useState(25);
+  const [secs, SetSecs] = useState(0); 
   const [start, SetStart] = useState("Start");
   const [startTimer, SetStartTimer] = useState(false);
+
   
-  useEffect(() => {
-    let newDay = new Date();
-    newDay.setMinutes(25);
-    newDay.setSeconds(0);
-    SetTimeLeft(newDay);
-  },[]);
+  const sessionTimer = () => {
+    let session = new Date();
+    session.setMinutes(min);
+    session.setSeconds(secs);
 
+    if(!startTimer){
+      SetStartTimer(true);
+      const myTimer = setInterval(() => {
+        const minutes = session.getMinutes();
+        const seconds = session.getSeconds();
+  
+        //console.log(`${minutes} --- ${seconds}`);
+        //session.setMinutes(sessionLength);
+        session.setSeconds(session.getSeconds() - 1);
+        //SetTimeLeft(session);
+        SetMins(minutes);
+        SetSecs(seconds);
+  
+        if (minutes === 0 && seconds === 0) {
+          //clearTimer();
+          clearInterval(myTimer);
+          console.log(" Session Timer finished");
 
-  useEffect(() => {
-    let x;
-    if(startTimer) {
-      
-      if(timerLabel === "Session"){ // Session Logic
-        setTimeout(() => {
-          x = new Date(timeLeft);
-          x.setSeconds(x.getSeconds() - 1);
-          if(x.getMinutes() == 0 && x.getSeconds() == 0){
-            SetTimeLeft(x);
-            SetStartTimer(false);
-            SetTimerLabel("Break")
-            handlePlayAudio(breakLength);
-          } else {
-            SetTimeLeft(x);
-          }
-        }, 1000);
-      } else if(timerLabel === "Break"){ // Break Logic
+          // setTimeout / play audio
+          breakTimer();
+        } 
+      },1000);
+  
+      SetSessionId(myTimer);
+    }
+  }
 
-        let newSession = new Date();
-        newSession.setMinutes(sessionLength);
-        newSession.setSeconds(0);
+  const breakTimer = () => {
+    let breakTime = new Date();
+    breakTime.setMinutes(breakLength);
+    breakTime.setSeconds(0);
 
-        setTimeout(() => {
-          x = new Date(timeLeft);
-          x.setSeconds(x.getSeconds() - 1);
-          if(x.getMinutes() == 0 && x.getSeconds() == 0){
-            SetTimeLeft(x);
-            //SetStartTimer(false);
-            SetTimerLabel("Session");
-            handleStopAudio();
-            SetTimeLeft(newSession);
-          } else {
-            SetTimeLeft(x);
-          }
-        }, 1000);
+      if(!startTimer){
+        SetStartTimer(true);
+        const myTimer = setInterval(() => {
+          const minutes = breakTime.getMinutes();
+          const seconds = breakTime.getSeconds();
+          //console.log(`${minutes} ---- ${seconds}`);
+          breakTime.setSeconds(breakTime.getSeconds() - 1);
+          SetMins(minutes);
+          SetSecs(seconds);
+  
+          if (minutes === 0 && seconds === 0) {
+            //clearTimer();
+            clearInterval(myTimer);
+            console.log("Break Timer finished");
+            sessionTimer();
+          } 
+        },1000);
+        SetSessionId(myTimer);
       }
-    }
-  },[startTimer, timeLeft, breakLength, timerLabel, sessionLength]);
-
-  const handlePlayAudio = (breakLength) => {
-
-    //let seconds = breakLength * 60;
-    //console.log(seconds);
-
-    if (audioRef.current) {
-        audioRef.current.play();
-        setTimeout(() => {
-          if(audioRef.current) {
-            audioRef.current.pause();
-          }
-          SetStartTimer(true);
-        },10000);
-    }
-    let newBreak = new Date();
-    newBreak.setMinutes(breakLength);
-    newBreak.setSeconds(0);
-    SetTimeLeft(newBreak);
   };
+
+  const clearTimer = () => {
+    clearInterval(sessionId);
+  }
+
+  // const handlePlayAudio = (breakLength) => {
+
+  //   //let seconds = breakLength * 60;
+  //   //console.log(seconds);
+
+  //   if (audioRef.current) {
+  //       audioRef.current.play();
+  //       setTimeout(() => {
+  //         if(audioRef.current) {
+  //           audioRef.current.pause();
+  //         }
+  //         SetStartTimer(true);
+  //       },10000);
+  //   }
+  //   let newBreak = new Date();
+  //   newBreak.setMinutes(breakLength);
+  //   newBreak.setSeconds(0);
+  //   SetTimeLeft(newBreak);
+  // };
 
   const handleStopAudio = () => {
     if(audioRef.current) {
@@ -87,34 +106,46 @@ function App() {
   }
 
   const decrement_break = () => {
-    if(breakLength - 1 == 0){
-      return;
-    } else {
-      SetBreakLength(() => breakLength - 1);
+    if(!startTimer){
+      if(breakLength - 1 == 0){
+        return;
+      } else {
+        SetBreakLength(() => breakLength - 1);
+      }
     }
+    
   }
 
   const increment_break = () => {
-    if(breakLength + 1 > 60){
-      return;
-    } else {
-      SetBreakLength(() => breakLength + 1);
+    if(!startTimer){
+      if(breakLength + 1 > 60){
+        return;
+      } else {
+        SetBreakLength(() => breakLength + 1);
+      }
     }
+    
   }
 
   const decrement_session = () => {
-    if(sessionLength - 1 == 0){
-      return;
-    } else {
-      SetSessionLength(() => sessionLength - 1);
+    if(!startTimer){
+      if(sessionLength - 1 == 0){
+        return;
+      } else {
+        SetSessionLength(() => sessionLength - 1);
+        SetMins(() => sessionLength - 1);
+      }
     }
   }
 
   const increment_session = () => {
-    if(sessionLength + 1 > 60){
-      return;
-    } else {
-      SetSessionLength(() => sessionLength + 1);
+    if(!startTimer){
+      if(sessionLength + 1 > 60){
+        return;
+      } else {
+        SetSessionLength(() => sessionLength + 1);
+        SetMins(() => sessionLength + 1);
+      }
     }
   }
 
@@ -132,10 +163,14 @@ function App() {
   const start_timer = () => {
     if(start == "Start"){
       SetStart("Stop");
-      SetStartTimer(true);
+      sessionTimer();
     } else{
       SetStart("Start");
+      clearTimer();
       SetStartTimer(false);
+      // let x = new Date(timeLeft);
+      // x.setSeconds(x.getSeconds());
+      // SetTimeLeft(x);
     }
   }
 
@@ -154,11 +189,16 @@ function App() {
       
       
       <p id="timer-label">{timerLabel}</p>
-      <p id="time-left">{timeLeft == null ? "" : `${String(timeLeft.getMinutes()).padStart(2,'0')}:${String(timeLeft.getSeconds()).padStart(2,'0')}`}</p>
+      <p id="time-left">{timeLeft == null ? "00:00" : `${String(min).padStart(2,'0')}:${String(secs).padStart(2,'0')}`}</p>
       <button id="start_stop" onClick={start_timer}>{start}</button>
       <button id="reset" onClick={reset}>Reset</button>
+
+      <button onClick={breakTimer}>Test</button>
+      <button onClick={clearTimer}>Test Clear</button>
+
+
      
-      <audio ref={audioRef}>
+      <audio ref={audioRef} id="beep">s
           <source src={beep} type="audio/mp3"/>
       </audio>
     </>
@@ -166,8 +206,3 @@ function App() {
 }
 
 export default App
-
-/**
- *  <button onClick={() => handlePlayAudio(5)}>Play Audio</button>
-      <button onClick={handleStopAudio}>Stop Audio</button>
- */
