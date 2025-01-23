@@ -10,20 +10,27 @@ function App() {
   const [sessionId, SetSessionId] = useState();
   const [breakLength, SetBreakLength] = useState(5);
   const [sessionLength, SetSessionLength] = useState(25);
-  const [timeLeft, SetTimeLeft] = useState(0);
+  //const [timeLeft, SetTimeLeft] = useState("00:00");
   const [min, SetMins] = useState(25);
   const [secs, SetSecs] = useState(0); 
   const [start, SetStart] = useState("Start");
   const [startTimer, SetStartTimer] = useState(false);
+  const [isSession, SetIsSession] = useState(true);
+  // eslint-disable-next-line no-unused-vars
+  const [isBreak, SetIsBreak] = useState(false);
 
   
-  const sessionTimer = () => {
+  const sessionTimer = (x, y) => {
     let session = new Date();
-    session.setMinutes(min);
-    session.setSeconds(secs);
-
+    session.setMinutes(x);
+    session.setSeconds(y);
+    
+    
+    SetIsSession(true);
+    SetTimerLabel("Session");
     if(!startTimer){
       SetStartTimer(true);
+
       const myTimer = setInterval(() => {
         const minutes = session.getMinutes();
         const seconds = session.getSeconds();
@@ -37,11 +44,25 @@ function App() {
   
         if (minutes === 0 && seconds === 0) {
           //clearTimer();
+          SetMins(0);
+          SetSecs(0);
           clearInterval(myTimer);
           console.log(" Session Timer finished");
-
           // setTimeout / play audio
-          breakTimer();
+          if(audioRef.current) {
+            audioRef.current.play();
+
+            
+
+            setTimeout(() => {
+              audioRef.current.pause();
+              SetIsSession(false);
+              // Set Break Mins
+              SetMins(breakLength);
+              SetSecs(0);
+              breakTimer(breakLength, 0);
+            },20000);
+          }
         } 
       },1000);
   
@@ -49,10 +70,15 @@ function App() {
     }
   }
 
-  const breakTimer = () => {
+  const breakTimer = (x, y) => {
+    //console.log(`${min} -- ${secs}`);
     let breakTime = new Date();
-    breakTime.setMinutes(breakLength);
-    breakTime.setSeconds(0);
+    breakTime.setMinutes(x);
+    breakTime.setSeconds(y);
+    
+    
+    SetIsBreak(true);
+    SetTimerLabel("Break");
 
       if(!startTimer){
         SetStartTimer(true);
@@ -66,9 +92,23 @@ function App() {
   
           if (minutes === 0 && seconds === 0) {
             //clearTimer();
-            clearInterval(myTimer);
+            SetMins(0);
+            SetSecs(0);            
             console.log("Break Timer finished");
-            sessionTimer();
+            clearInterval(myTimer);
+
+            if(audioRef.current) {
+              
+              //audioRef.current.play();
+  
+              setTimeout(() => {
+                //audioRef.current.pause();
+                SetIsBreak(false);
+                sessionTimer(sessionLength, 0);
+              },10000);
+
+              
+            }
           } 
         },1000);
         SetSessionId(myTimer);
@@ -79,29 +119,11 @@ function App() {
     clearInterval(sessionId);
   }
 
-  // const handlePlayAudio = (breakLength) => {
-
-  //   //let seconds = breakLength * 60;
-  //   //console.log(seconds);
-
-  //   if (audioRef.current) {
-  //       audioRef.current.play();
-  //       setTimeout(() => {
-  //         if(audioRef.current) {
-  //           audioRef.current.pause();
-  //         }
-  //         SetStartTimer(true);
-  //       },10000);
-  //   }
-  //   let newBreak = new Date();
-  //   newBreak.setMinutes(breakLength);
-  //   newBreak.setSeconds(0);
-  //   SetTimeLeft(newBreak);
-  // };
 
   const handleStopAudio = () => {
     if(audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   }
 
@@ -150,27 +172,34 @@ function App() {
   }
 
   const reset = () => {
-    let resetDay = new Date();
-    resetDay.setMinutes(25);
-    resetDay.setSeconds(0);
-    SetTimeLeft(resetDay);
-    SetStartTimer(false);
-    SetBreakLength(() => 5);
-    SetSessionLength(() => 25);
+    clearTimer();
     handleStopAudio();
+    //SetTimeLeft(0);
+    SetMins(25);
+    SetSecs(0);
+    SetStartTimer(false);
+    SetBreakLength(5);
+    SetSessionLength(25);
+    SetStart(start);
+    SetTimerLabel("Session");
+    
   }
 
   const start_timer = () => {
     if(start == "Start"){
       SetStart("Stop");
-      sessionTimer();
+      if(isSession){
+        sessionTimer(min, secs);
+      } else {
+        breakTimer(min, secs);
+      }
+      
+      //handleTimer();
     } else{
+      handleStopAudio();
       SetStart("Start");
       clearTimer();
       SetStartTimer(false);
-      // let x = new Date(timeLeft);
-      // x.setSeconds(x.getSeconds());
-      // SetTimeLeft(x);
     }
   }
 
@@ -189,14 +218,9 @@ function App() {
       
       
       <p id="timer-label">{timerLabel}</p>
-      <p id="time-left">{timeLeft == null ? "00:00" : `${String(min).padStart(2,'0')}:${String(secs).padStart(2,'0')}`}</p>
+      <p id="time-left">{`${String(min).padStart(2,'0')}:${String(secs).padStart(2,'0')}`}</p>
       <button id="start_stop" onClick={start_timer}>{start}</button>
       <button id="reset" onClick={reset}>Reset</button>
-
-      <button onClick={breakTimer}>Test</button>
-      <button onClick={clearTimer}>Test Clear</button>
-
-
      
       <audio ref={audioRef} id="beep">s
           <source src={beep} type="audio/mp3"/>
@@ -206,3 +230,17 @@ function App() {
 }
 
 export default App
+
+/**
+ *  // const handlePlayAudio = () => {
+  //   if (audioRef.current) {
+  //       audioRef.current.play();
+  //       setTimeout(() => {
+  //         if(audioRef.current) {
+  //           audioRef.current.pause();
+  //         }
+  //         SetStartTimer(true);
+  //       },10000);
+  //   }
+  // };
+ */
