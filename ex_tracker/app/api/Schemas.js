@@ -1,17 +1,18 @@
 const { default: mongoose } = require("mongoose");
 
+
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
     },
-    _id: {
+    id: {
         type: String,
     }
 });
 
 
 const ExerciseSchema = new mongoose.Schema({
-    username: {
+    id: {
         type: String
     },
     description: {
@@ -23,9 +24,6 @@ const ExerciseSchema = new mongoose.Schema({
     date: {
         type: String
     },
-    _id: {
-        type: String
-    }
 });
 
 
@@ -36,7 +34,7 @@ const LogSchema = new mongoose.Schema({
     count: {
         type: Number
     },
-    _id: {
+    id: {
         type: String
     },
     log: {
@@ -55,7 +53,7 @@ const LogSchema = new mongoose.Schema({
 });
 
 const User = mongoose.models.User || mongoose.model("Users", UserSchema, "users");
-const Exercise = ExerciseSchema || mongoose.model("Exercises", ExerciseSchema, "exercises");
+const Exercise = mongoose.models.Exercise || mongoose.model("Exercises", ExerciseSchema, "exercises");
 const Log = LogSchema || mongoose.model("Logs", LogSchema, "logs");
 
 module.exports = { User, Exercise, Log };

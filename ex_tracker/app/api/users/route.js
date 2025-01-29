@@ -1,12 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
 import mongoose from "mongoose";
-import { User }  from "../Schemas";
+//import { User }  from "../Schemas";
 
+const UserSchema = new mongoose.Schema({
+    username: {
+        type: String,
+    },
+    id: {
+        type: String,
+    }
+});
 
+const User = mongoose.models.User || mongoose.model("Users", UserSchema, "users");
 
 export async function POST(request){
-
-    // const UserModel = mongoose.model('User', UserSchema);
     
     try {
         let mongo_uri = process.env.MONGO_URI;
@@ -16,16 +23,16 @@ export async function POST(request){
                 dbName: 'Exercise-Tracker'
             })
         }
-        
 
+        let data = await request.json();
+
+        // check if username exists
         const newUser = new User({
-            username: `Test User - ${Math.floor(Math.random() * 300)}`,
-            _id: new mongoose.Types.ObjectId().toString(),
+            username: data.username,
+            id: new mongoose.Types.ObjectId().toString(),
         });
 
-
         await newUser.save();
-        
 
         return NextResponse.json({ msg: "User Added"}, {status: 200});
     } catch (error) {
