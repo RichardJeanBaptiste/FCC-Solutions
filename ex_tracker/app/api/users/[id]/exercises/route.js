@@ -1,45 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import mongoose from "mongoose";
-//import { Exercise } from "@/app/api/Schemas";
+import { Exercise, User, Log } from "@/app/api/Schemas";
 
-/**
- * 
- * const ExerciseSchema = new mongoose.Schema({
-     username: {
-         type: String
-     },
-     description: {
-         type: String
-     },
-     duration: {
-         type: Number
-     },
-     date: {
-         type: String
-     },
-     _id: {
-         type: String
-     }
- }); 
- * 
- */
-
-const ExerciseSchema = new mongoose.Schema({
-    id: {
-        type: String
-    },
-    description: {
-        type: String
-    },
-    duration: {
-        type: Number
-    },
-    date: {
-        type: String
-    },
-});
-
-const Exercise = mongoose.models.Exercise || mongoose.model("Exercises", ExerciseSchema, "exercises");
 
 export async function POST(request) {
     try {
@@ -47,6 +9,7 @@ export async function POST(request) {
         const url = await request.url;
         const urlSegments = url.split('/');
         let userId = urlSegments[5];
+        let userDate;
 
         let mongo_uri = process.env.MONGO_URI;
         
@@ -56,18 +19,55 @@ export async function POST(request) {
             })
         }
 
-        const newExercise = new Exercise({
-            id: userId,
+        if(data.date == "" || data.date == undefined){
+            userDate = new Date().toDateString();
+        } else {
+            userDate = new Date(data.date).toDateString();
+        }
+
+        let user = await Log.findById(userId);
+
+        if (user == null) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        //console.log(user);
+
+        await Log.updateOne(
+            {_id : userId},
+            {
+                $push: {
+                    log: {
+                        description: data.description,
+                        duration: Number(data.duration),
+                        date: userDate
+                    }
+                },
+                $inc : {count : 1}
+
+            }
+        );
+
+        //let updatedUser = await Log.findById(userId);
+
+        let exerciseLog = {
+            username: user.username,
             description: data.description,
             duration: data.duration,
-            date: data.date,
-        })
+            date: userDate,
+            _id: user._id,
+        }
 
-        await newExercise.save();
-
-        return NextResponse.json({msg: "Exercise Added"}, {status: 200});
+        await mongoose.disconnect();
+        return NextResponse.json({exerciseLog}, {status: 200});
     } catch (error) {
-        console.log(error);
+        
+        console.error(error);
+
+        if(error.name === "CastError"){
+            return NextResponse.json({ msg: "Invalid User ID format" }, { status: 400 });
+        }
+       
         return NextResponse.json({msg: `Server Error : \n${error}`},{status : 500});
     }
 }

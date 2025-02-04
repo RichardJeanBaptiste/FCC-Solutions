@@ -37,24 +37,14 @@ const LogSchema = new mongoose.Schema({
     id: {
         type: String
     },
-    log: {
-        type: [{
-            description: {
-                type: String,
-            },
-            duration: {
-                type: Number,
-            },
-            date: {
-                type: String,
-            },
-        }]
+    log : {
+        type: Array
     }
 });
 
-const User = mongoose.models.User || mongoose.model("Users", UserSchema, "users");
-const Exercise = mongoose.models.Exercise || mongoose.model("Exercises", ExerciseSchema, "exercises");
-const Log = LogSchema || mongoose.model("Logs", LogSchema, "logs");
+const User = mongoose.models.User || mongoose.model("User", UserSchema, "users");
+const Exercise = mongoose.models.Exercise || mongoose.model("Exercise", ExerciseSchema, "exercises");
+const Log = mongoose.models.Log || mongoose.model("Log", LogSchema, "logs");
 
 module.exports = { User, Exercise, Log };
 //module.exports = User;
