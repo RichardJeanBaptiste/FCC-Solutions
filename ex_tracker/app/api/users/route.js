@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
+import { headers } from 'next/headers';
 import mongoose from "mongoose";
 import { User, Log }  from "../Schemas";
 
@@ -13,26 +14,39 @@ export async function POST(request){
                 dbName: 'Exercise-Tracker'
             })
         }
-        //console.log(request.json());
-        let data = await request.json();
+
+        let data;
+        let currentUsername;
+
+        // Get Headers
+        const headersList = await headers();
+        const userAgent = headersList.get('content-type').split(";");
+        const contentType = userAgent[0];
+
+        if(contentType == "multipart/form-data"){
+            data = await request.formData();
+            currentUsername = data.get("username");
+        } else {
+            data = await request.json();
+            currentUsername = data.username;
+        }
+        
         let newId = new mongoose.Types.ObjectId().toString();
 
-        // check if username exists
-        
-        let checkUsername = await User.find({username: data.username});
+        let checkUsername = await User.find({username: currentUsername});
 
         if(checkUsername.length > 0) {
             return NextResponse.json({msg: "Username Exists"}, {status: 404});
         }
 
         const newUser = new User({
-            username: data.username,
+            username: currentUsername,
             _id: newId,
         });
 
         const newUserLog = new Log({
             _id: newId,
-            username: data.username,
+            username: currentUsername,
             count: 0,
             log: [],
         })
@@ -60,7 +74,7 @@ export async function GET(){
 
         const users = await User.find({});
 
-        return NextResponse.json({users}, {status: 200});
+        return NextResponse.json(users, {status: 200});
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });

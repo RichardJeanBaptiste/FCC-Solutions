@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { headers } from 'next/headers';
 import mongoose from "mongoose";
 import { Log } from "@/app/api/Schemas";
 
@@ -13,6 +14,11 @@ export async function GET(request) {
             })
         }
 
+        // Get Headers
+        // const headersList = await headers();
+        // const userAgent = headersList.get('content-type').split(";");
+        // const contentType = userAgent[0];
+
 
         const reqUrl = request.url;
         const reqUrlSegments = reqUrl.split('/');
@@ -25,8 +31,7 @@ export async function GET(request) {
         let limit = null;
 
         let log = await Log.findById(userId);
-        let logCopy =  log.log;
-        let countEntries = 0;
+        let logCopy = log.log;
         let displayLog = [];
 
         if(hasQuery){
@@ -104,10 +109,10 @@ export async function GET(request) {
                 }
             }                       
 
-            return NextResponse.json({displayLog}, {status: 200});
+            return NextResponse.json(displayLog, {status: 200});
         }    
 
-        return NextResponse.json({log}, {status: 200});
+        return NextResponse.json(log, {status: 200});
     } catch (error) {
         console.error(error);
         return NextResponse.json({"msg": "Something went wrong while getting your logs :("}, {status : 500});

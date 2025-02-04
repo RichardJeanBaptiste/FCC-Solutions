@@ -1,15 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
+import { headers } from 'next/headers';
 import mongoose from "mongoose";
 import { Exercise, User, Log } from "@/app/api/Schemas";
 
 
 export async function POST(request) {
     try {
-        const data = await request.json();
-        const url = await request.url;
-        const urlSegments = url.split('/');
-        let userId = urlSegments[5];
-        let userDate;
 
         let mongo_uri = process.env.MONGO_URI;
         
@@ -19,27 +15,60 @@ export async function POST(request) {
             })
         }
 
-        if(data.date == "" || data.date == undefined){
-            userDate = new Date().toDateString();
+        // Get Headers
+        const headersList = await headers();
+        const userAgent = headersList.get('content-type').split(";");
+        const contentType = userAgent[0];
+
+        
+        const url = await request.url;
+        const urlSegments = url.split('/');
+        let userId = urlSegments[5];
+        let data;
+        let userDate;
+        let desc;
+        let duration;
+
+        if(contentType == "multipart/form-data"){
+
+            data = await request.formData();
+            
+            if(data.get("date") == "" || data.get("date") == undefined){
+                userDate = new Date().toDateString();
+            } else {
+                userDate = new Date(data.get("date")).toDateString();
+            }
+
+            desc = data.get("description");
+            duration = Number(data.get("duration"));
         } else {
-            userDate = new Date(data.date).toDateString();
+
+            data = await request.json();
+
+            if(data.date == "" || data.date == undefined){
+                userDate = new Date().toDateString();
+            } else {
+                userDate = new Date(data.date).toDateString();
+            }
+
+            desc = data.description;
+            duration = Number(data.duration);
         }
 
+        
         let user = await Log.findById(userId);
 
         if (user == null) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        //console.log(user);
-
         await Log.updateOne(
             {_id : userId},
             {
                 $push: {
                     log: {
-                        description: data.description,
-                        duration: Number(data.duration),
+                        description: desc,
+                        duration: duration,
                         date: userDate
                     }
                 },
@@ -52,14 +81,14 @@ export async function POST(request) {
 
         let exerciseLog = {
             username: user.username,
-            description: data.description,
-            duration: data.duration,
+            description: desc,
+            duration: duration,
             date: userDate,
             _id: user._id,
         }
 
         await mongoose.disconnect();
-        return NextResponse.json({exerciseLog}, {status: 200});
+        return NextResponse.json(exerciseLog, {status: 200});
     } catch (error) {
         
         console.error(error);
