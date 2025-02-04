@@ -17,7 +17,7 @@ export async function GET(request) {
         const reqUrl = request.url;
         const reqUrlSegments = reqUrl.split('/');
         const userId = reqUrlSegments[5];
-        const urlObj =  new URL(reqUrl, "http://localhost:3000");
+        const urlObj =  new URL(reqUrl, "https://extracker.vercel.app/");
         let hasQuery = urlObj.searchParams.toString().length > 0;
         let queryEntries = Object.fromEntries(urlObj.searchParams.entries());
         let from = null;
