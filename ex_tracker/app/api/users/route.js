@@ -55,7 +55,7 @@ export async function POST(request){
         await newUserLog.save();
         await mongoose.disconnect();
         
-        return NextResponse.json({newUser}, {status: 200});
+        return NextResponse.json(newUser, {status: 200});
     } catch (error) {
         console.error(error);
         return NextResponse.json({msg: "Server Error :("},{status: 500});
@@ -74,7 +74,7 @@ export async function GET(){
 
         const users = await User.find({});
 
-        return NextResponse.json(users, {status: 200});
+        return NextResponse.json([users], {status: 200});
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
