@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, startTransition } from 'react';
 import H1 from './assets/Heater-1.mp3';
 import H2 from './assets/Heater-2.mp3';
 import H3 from './assets/Heater-3.mp3';
@@ -17,24 +17,28 @@ interface DrumPadProps {
 }
 
 function App() {
-  const [displayString, setDisplayString] = useState("");
+  const [displayString, setDisplayString] = useState<string>("Nothing is currently playing");
 
   const DrumPad: React.FC<DrumPadProps> = ({keyName, audioSrc, audioName}) => {
-
 
     const audioRef:any = useRef(null);
 
     const playAudio = () => {
 
-      setDisplayString(audioName + " : is currently playing");
+      const displayElement = document.getElementById("display");
+      let x = audioName + " : is currently playing";
+
       if (audioRef.current) {
         audioRef.current.play();
+      }
+
+      if (displayElement) {
+        displayElement.innerText = x;
       }
     }
 
     useEffect(() => {
       document.addEventListener('keydown', (event:any) => {
-        //console.log(event.key.toUpperCase() + " " + keyName);
         if(event.key.toUpperCase() == keyName){
           playAudio();
         }
@@ -52,11 +56,8 @@ function App() {
 
   return (
     <div id="drum-machine">
-      <div id="display">
-        <p>{displayString}</p>
-      </div>
+      <div id="display">{displayString}</div>
 
-    
       <DrumPad keyName="Q" audioSrc={H1} audioName='Q'/>
       <DrumPad keyName="W" audioSrc={H2} audioName='W'/>
       <DrumPad keyName="E" audioSrc={H3} audioName='E'/>
