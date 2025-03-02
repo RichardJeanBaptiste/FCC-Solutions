@@ -1,4 +1,6 @@
-import { useRef, useState, useEffect, startTransition } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useRef, useState, useEffect} from 'react';
 import H1 from './assets/Heater-1.mp3';
 import H2 from './assets/Heater-2.mp3';
 import H3 from './assets/Heater-3.mp3';
@@ -26,7 +28,7 @@ function App() {
     const playAudio = () => {
 
       const displayElement = document.getElementById("display");
-      let x = audioName + " : is currently playing";
+      const x = audioName + " : is currently playing";
 
       if (audioRef.current) {
         audioRef.current.play();
