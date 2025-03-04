@@ -58,6 +58,8 @@ function App() {
 
   return (
     <div id="drum-machine">
+
+      <div>Richard Jean-Baptiste</div>
       <div id="display">{displayString}</div>
 
       <DrumPad keyName="Q" audioSrc={H1} audioName='Q'/>
