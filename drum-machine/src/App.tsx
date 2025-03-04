@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useRef, useState, useEffect} from 'react';
+import { useRef, useEffect} from 'react';
 import H1 from './assets/Heater-1.mp3';
 import H2 from './assets/Heater-2.mp3';
 import H3 from './assets/Heater-3.mp3';
@@ -19,7 +19,6 @@ interface DrumPadProps {
 }
 
 function App() {
-  const [displayString, setDisplayString] = useState<string>("Nothing is currently playing");
 
   const DrumPad: React.FC<DrumPadProps> = ({keyName, audioSrc, audioName}) => {
 
@@ -60,7 +59,7 @@ function App() {
     <div id="drum-machine">
 
       <div>Richard Jean-Baptiste</div>
-      <div id="display">{displayString}</div>
+      <div id="display"></div>
 
       <DrumPad keyName="Q" audioSrc={H1} audioName='Q'/>
       <DrumPad keyName="W" audioSrc={H2} audioName='W'/>
