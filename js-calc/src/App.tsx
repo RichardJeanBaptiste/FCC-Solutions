@@ -111,6 +111,7 @@ function App() {
           }
         } else if(isOperand(input[i - 1])) {
           operand = current;
+          isNegative = false;
           continue;
         } else {
           if(isNegative){
