@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react';
 import './App.css';
 
@@ -7,6 +9,7 @@ function App() {
 
   const clearDisplay = () => {
     setCVal("0");
+    SetAddDecimal(true);
   }
 
   const isOperand = (x: string | undefined) : boolean => {
@@ -40,20 +43,19 @@ function App() {
           x = cVal + input;
           SetAddDecimal(false);
         } else {
+          //console.log(input);
           return;
         }
       } else if(input == "+" || input == "-" || input == "*" || input == "/") {
-
-        // if(isOperand(lastChar)){
-        //   return;
-        // }
 
         x = cVal + input;
         SetAddDecimal(true);
 
       } else {
+        //SetAddDecimal(true);
         x = cVal + input;
         setCVal(x);
+
         return;
       }
       
@@ -61,64 +63,95 @@ function App() {
     }
   }
 
-  const sumValues = (leftSide: number, operand: string, rightSide: string) => {
-
+  const sumValues = (leftSide: number, operand: string, rightSide: number) => {
+    // check if negative then product negative val negative number
     if(operand == "+"){
-      return leftSide + Number(rightSide);
+      console.log(leftSide + " " +  rightSide);
+      return leftSide + rightSide;
     } else if(operand == "*"){
-      return leftSide * Number(rightSide);
+      //console.log("Not Negative: " + leftSide + " " + Number(rightSide) + " " + isNegative);
+      return leftSide * rightSide;
     } else if (operand == "/") {
-      return leftSide / Number(rightSide);
+        return leftSide / rightSide;
+    } else if(operand == "-") {
+      return leftSide - rightSide;
     }
   }
 
   const sumEquation = () => {
-    
-    let temp: string | undefined = "";
-    //let tempNegative;
-    let tempOperand = "+";
+    let input = cVal.split("");
+    let temp = "";
+    let current = "";
+    let operand = "+";
     let result: number | undefined = 0;
-    let current;
-    //let leftSide: int | null = null;
-    //let rightSide: int | null = null;
+    let isNegative = false;
+    
+    for(let i = 0; i < input.length; i++){
+      current = input[i];
 
-    const x: string[] = cVal.split("").reverse();
-    const xLength = x.length;
-    console.log(x);
 
-    for(let i = 0; i < xLength; i++){
-      current = x.pop();
-
-      if(current == undefined){
-        break;
-      }
-      
+      // if number 
       if(!isOperand(current)){
         temp += current;
-      } else {        
-        // character is operand
+      } else {
 
-        if(result == undefined || temp == undefined){
+        if(result == undefined){
           break;
         }
+        
+        if(current == "-"){
+          // check number before
+          if(isOperand(input[i - 1])){
+            isNegative = true;
+            continue;
+          } else {
+            result = sumValues(result, operand, Number(temp));
+            operand = current;
+            temp = "";
+          }
+        } else if(isOperand(input[i - 1])) {
+          operand = current;
+          continue;
+        } else {
+          if(isNegative){
+            result = sumValues(result, operand, -(Number(temp)));
+            operand = current;
+            temp = "";
+            isNegative = false;
+          } else {
+            result = sumValues(result, operand, Number(temp));
+            operand = current;
+            temp = "";
+          }
+        }
 
-        console.log(result + " " + tempOperand + " " + temp);
-        result = sumValues(result, tempOperand, temp);
-
-        // Switch to the next operand
-        tempOperand = current;
-        temp = "";
+       
       }
     }
 
-    if( result != undefined) {
-      console.log(sumValues(result,tempOperand, temp));
-    }
     
+    if(result != undefined){
+      console.log(result);
+      if(isNegative){
+        setCVal(String(sumValues(result, operand, -(Number(temp)))));
+      } else {
+        setCVal(String(sumValues(result, operand, Number(temp))));
+      } 
+    }
+
+    SetAddDecimal(true);
   }
 
   return (
     <div>
+
+      <div>
+
+        <p>
+          The sequence "5 * - + 5" = should produce an output of "10" : expected '5' to equal '10'
+        </p>
+
+      </div>
       <div id="display">
         {cVal}
       </div>
