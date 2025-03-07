@@ -9,23 +9,29 @@ import './App.css'
 function App() {
 
   const init = `
-  # React Markdown Previewer
+  # Welcome to my React Markdown Previewer!
 
-## sub-heading1...
-### sub-headin2
+## This is a sub-heading...
+### And here's some other cool stuff:
 
-\`console.log("Hello freecodecamp")\`,
+Heres some code, \`<div></div>\`, between 2 backticks.
 
 \`\`\`
 // this is multi-line code:
 
-function add(num1, num2) {
-  return num1 + num2;
+function anotherExample(firstLine, lastLine) {
+    return multiLineCode;
+  }
 }
 \`\`\`
 
-Google: [Google](https://google.com)
-> Block Quotes
+You can also make text **bold**... whoa!
+Or _italic_.
+Or... wait for it... **_both!_**
+And feel free to go crazy ~~crossing stuff out~~.
+
+There's also [links](https://www.freecodecamp.org), and
+> Block Quotes!
 
 And if you want to get really crazy, even tables:
 
@@ -40,9 +46,9 @@ And here. | Okay. | I think we get it.
         - That look like this.
 
 
-1. one
-2. two
-3. 3
+1. And there are numbered lists too.
+1. Use just 1s if you want!
+1. And last but not least, let's not forget embedded images:
 
 ![freeCodeCamp Logo](https://cdn.freecodecamp.org/testable-projects-fcc/images/fcc_secondary.svg)
 `;
